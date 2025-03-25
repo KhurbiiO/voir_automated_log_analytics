@@ -1,32 +1,52 @@
 services:
  analysis-service: 
-     container_name: voir_analysis
      build:
          context: analysis-services
+     ports:
+         - "8000:8000"
+     stop_signal: SIGINT
      depends_on:
       - mongo
+     networks:
+         - generation-database
 
  transformation-service:
-     container_name: voir_transformation 
      build:
          context: transformation-services 
+     ports:
+         - "8001:8001"
+     stop_signal: SIGINT
+     networks:
+         - pipeline-transformation
+     
+ logstash:
+     build:
+         context: logstash
      depends_on:
          - mongo
+     networks:
+         - pipeline-transformation
+         - pipeline-output
 
  mongo: 
      image: mongodb/mongodb-community-server:6.0.10-ubi8
+     ports:
+         - "27017:27017"
      restart: always
-     environment:
-         - MONGO_INITDB_ROOT_USERNAME=test
-         - MONGO_INITDB_ROOT_PASSWORD=test 
      volumes:
-         - type: bind
-           source: ./data
-           target: /data/db
+         - mongodb_data:/data/db 
+     networks:
+         - generation-database
+         - pipeline-output
 
- logstash:
-     image: logstash:8.17.3 
-     volumes:
-         - ./logstash/config
+networks:
+    generation-database:
+    pipeline-input:
+    pipeline-transformation:
+    pipeline-output:
+
+volumes:
+    mongodb_data:
+
      
    
