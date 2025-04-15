@@ -39,6 +39,19 @@ services:
          - generation-database
          - pipeline-output
 
+ mongo-express:
+     image: mongo-express:latest
+     environment:
+         - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+         - ME_CONFIG_MONGODB_ADMINPASSWORD=example
+         - ME_CONFIG_MONGODB_SERVER=mongo
+     ports:
+         - "8081:8081"
+     depends_on:
+         - mongo
+     networks:
+         - generation-database
+
 networks:
     generation-database:
     pipeline-input:
