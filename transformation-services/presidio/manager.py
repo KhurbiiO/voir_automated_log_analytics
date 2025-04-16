@@ -9,7 +9,6 @@ class MultiPresidioManager:
         self.engines = {}
 
         for key in self.config.keys():
-            print(key)
             provider = NlpEngineProvider(conf_file=self.config[key]["path"])
             nlp_engine = provider.create_engine()
 
@@ -21,7 +20,9 @@ class MultiPresidioManager:
             self.engines.update({key: analyzer})
 
     def run(self, lang:str, msg: str):
-        results = self.engines[lang]
+        engine = self.engines[lang]
+        results = engine.analyze(text=msg,
+                           language=lang)
         return [msg[pred.start:pred.end] for pred in results]
         
 

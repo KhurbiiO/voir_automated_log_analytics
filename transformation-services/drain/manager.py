@@ -11,8 +11,8 @@ class MultiDrainManager:
 
         for key in self.config.keys():
             drain_config = TemplateMinerConfig()
-            drain_config.load(self.config[key]["CONFIG"])
-            persistence = FilePersistence(self.config[key]["STATE"])
+            drain_config.load(self.config[key]["config"])
+            persistence = FilePersistence(self.config[key]["state"])
             miner = TemplateMiner(persistence)
             self.states.update({key: miner})
             

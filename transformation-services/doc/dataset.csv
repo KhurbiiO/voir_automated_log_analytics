@@ -1,0 +1,57 @@
+msg, _has_PII
+DEBUG: User user_4 session expired, 0
+INFO: User user_2 changed password, 0
+INFO: User Arthur Jacobsohn changed password, 1
+WARNING: IP 192.168.1.2 is temporarily blocked due to multiple failed login attempts, 1
+ERROR: User user_1 encountered an unexpected error, 0
+INFO: User user_7 logged in from IP 192.168.1.8, 0
+DEBUG: Resource resource_1 loaded successfully for user user_10, 0
+ERROR: Failed to load resource resource_10 for user user_5, 0
+WARNING: User user_8 attempted to access restricted area, 0
+INFO: User user_3 logged out, 0
+INFO: User Joella logged out, 1
+ERROR: Resource resource_5 not found for user user_6, 0
+DEBUG: User user_9 session expired, 0
+INFO: User user_5 changed password, 0
+INFO: User PAtricia changed password, 1
+WARNING: IP 192.168.1.7 is temporarily blocked due to multiple failed login attempts, 1
+ERROR: User user_2 encountered an unexpected error, 0
+INFO: User user_10 logged in from IP 192.168.1.3, 1
+DEBUG: Resource resource_8 loaded successfully for user user_4, 0
+ERROR: Failed to load resource resource_3 for user user_7, 0
+WARNING: User user_1 attempted to access restricted area, 0
+INFO: User user_6 logged out, 0
+ERROR: Resource resource_2 not found for user user_8, 0
+DEBUG: User user_3 session expired, 0
+DEBUG: User J@nick Percy session expired, 1
+INFO: User user_8 changed password, 0
+WARNING: IP 192.168.1.5 is temporarily blocked due to multiple failed login attempts, 1
+ERROR: User user_9 encountered an unexpected error, 0
+INFO: User user_1 logged in from IP 192.168.1.6, 1
+DEBUG: Resource resource_7 loaded successfully for user user_2, 0
+ERROR: Failed to load resource resource_4 for user user_10, 0
+WARNING: User user_5 attempted to access restricted area, 0
+INFO: User user_4 logged out, 0
+ERROR: Resource resource_6 not found for user user_3, 0
+DEBUG: User user_7 session expired, 0
+INFO: User user_9 changed password, 0
+WARNING: IP 192.168.1.1 is temporarily blocked due to multiple failed login attempts, 1
+ERROR: User user_6 encountered an unexpected error, 0
+INFO: User user_2 logged in from IP 192.168.1.9, 1
+DEBUG: Resource resource_9 loaded successfully for user user_5, 0
+ERROR: Failed to load resource resource_1 for user user_8, 0
+WARNING: User user_10 attempted to access restricted area, 0
+WARNING: User Gaunshee Lui-Han attempted to access restricted area, 1
+INFO: User user_3 logged out, 0
+ERROR: Resource resource_10 not found for user user_4, 0
+DEBUG: User user_6 session expired, 0
+INFO: User user_7 changed password, 0
+WARNING: IP 192.168.1.4 is temporarily blocked due to multiple failed login attempts, 1
+ERROR: User user_3 encountered an unexpected error, 0
+INFO: User user_8 logged in from IP 192.168.1.10, 0
+DEBUG: Resource resource_2 loaded successfully for user user_9, 0
+ERROR: Failed to load resource resource_5 for user user_1, 0
+WARNING: User user_2 attempted to access restricted area, 0
+WARNING: User @Lisha Peters0n attempted to access restricted area, 1
+INFO: User user_10 logged out, 0
+ERROR: Resource resource_7 not found for user user_6, 0

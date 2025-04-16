@@ -3,3 +3,4 @@ uvicorn[standard]
 pydantic>=2.7.0,<3.0.0
 presidio_analyzer==2.2.358
 Drain3==0.9.11
+pandas

@@ -1,5 +1,6 @@
 import os
 import yaml
+import pandas as pd
 
 def append(directory: str, filepath:str):
     if os.path.isdir(directory):
@@ -11,3 +12,5 @@ def load_config(filepath: str) -> dict:
         return yaml.safe_load(file)
     return None
 
+def load_dataset(filepath: str):
+    return pd.read_csv(filepath)
