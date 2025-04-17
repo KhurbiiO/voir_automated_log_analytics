@@ -42,9 +42,10 @@ services:
  mongo-express:
      image: mongo-express:latest
      environment:
-         - ME_CONFIG_MONGODB_ADMINUSERNAME=root
-         - ME_CONFIG_MONGODB_ADMINPASSWORD=example
+         - ME_CONFIG_BASICAUTH_USERNAME=admin
+         - ME_CONFIG_BASICAUTH_PASSWORD=StrngP@ss123
          - ME_CONFIG_MONGODB_SERVER=mongo
+         - ME_CONFIG_MONGODB_PORT=27017
      ports:
          - "8081:8081"
      depends_on:

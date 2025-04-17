@@ -12,18 +12,18 @@ df = load_dataset("doc/dataset.csv") # Testing Dataset
 app = FastAPI()
 
 @app.get("/test")
-def test_api():
+def test():
     result = df.sample()
     return {"msg": result["msg"].iloc[0]}
 
 @app.post("/full-transform")
-def zero_example(req: TransformRequest):
+def get_full_transform(req: TransformRequest):
     pii = presidio_manager.run(req.pii_detection_LANG, req.msg)
     template = drain_manager.run(req.template_miner_ID, req.msg, req.template_miner_LEARN)
 
     result = TransformResponse(
         template=template,
-        hasPII=(len(pii) > 0)
+        hasPII=("True" if len(pii) > 0 else "False")
     )
 
     return result

@@ -8,7 +8,7 @@ class TransformRequest(BaseModel):
 
 class TransformResponse (BaseModel):
     template: str
-    hasPII: bool
+    hasPII: str
 
 
 
