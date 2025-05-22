@@ -16,6 +16,10 @@ def test():
     result = df.sample()
     return {"msg": result["msg"].iloc[0]}
 
+@app.get("/get-template")
+def get_template():
+    pass
+
 @app.post("/full-transform")
 def get_full_transform(req: TransformRequest):
     pii = presidio_manager.run(req.pii_detection_LANG, req.msg)
