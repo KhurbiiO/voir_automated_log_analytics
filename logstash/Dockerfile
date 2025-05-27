@@ -4,9 +4,6 @@ FROM docker.elastic.co/logstash/logstash:${LOGSTASH_VERSION}
 
 RUN bin/logstash-plugin install logstash-output-mongodb
 
-COPY config/* config/
-COPY pipeline/default.conf pipeline/logstash.conf
-
 WORKDIR /usr/share/logstash
 
 USER 1000
