@@ -1,5 +1,5 @@
-import pandas as pd
 from pymongo import MongoClient
+import datetime
 
 class DBClient():
     def __init__(self, uri, db):
@@ -20,15 +20,22 @@ class DBClient():
     # Read Benchmark
     def read_window(self, start, end, collection):
         collection = self.db[collection]
-        records = collection.find({"timestamp": {"$gte": start, "$lte": end}})
-        return self.to_df(records)
+        records = list(collection.find({"@timestamp": {"$gte": start, "$lte": end}}))
+        self.clean_records(records)
+        return records
     
     def read_all(self, collection):
         collection = self.db[collection]
-        records = collection.find()
-        return self.to_df(records)
+        records = list(collection.find())
+        self.clean_records(records)
 
-    def to_df(self, data):
-        data = list(data)  # Convert cursor to a list
-        df = pd.DataFrame(data)
-        return df
+        return records
+
+    def clean_records(self, records):
+        for doc in records:
+            if '_id' in doc:
+                doc['_id'] = str(doc['_id'])
+
+            for k, v in doc.items():
+                if isinstance(v, datetime.datetime):
+                    doc[k] = v.isoformat()

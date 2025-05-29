@@ -88,7 +88,7 @@ class Predictor():
             "on_memory": True,
             "num_workers": 5,
 
-            "num_candidates": 5,
+            "num_candidates": 3,
             "gaussian_mean": 0.0,
             "gaussian_std": 1.0,
         }
