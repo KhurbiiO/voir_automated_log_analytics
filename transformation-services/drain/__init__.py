@@ -1,2 +1,2 @@
-from drain.manager import *
 from drain.filter import *
+from drain.manager import *

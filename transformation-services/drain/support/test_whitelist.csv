@@ -1,0 +1,5 @@
+_value
+2025-03-19 15:18:27 [WARN ] [http-nio-8090-exec-4] - c.e.d.dctm.servlets.download.Download   : error in downloading file:org.apache.catalina.connector.ClientAbortException: java.io.IOException: Broken pipe
+2025-02-27 21:06:41 [WARN ] [http-nio-8080-exec-5] - c.e.d.dctm.servlets.download.Download   : error in downloading file:com.emc.d2fs.exceptions.D2fsException: System compromised
+  ERROR CC-0037: Document with r_object_id '09027f94a7d5f8ae' is missing a corresponding entry in dm_root table
+"    WARNING CC-0010: Sysobject with r_object_id '09027f9489c59cf1' belongs to owner 'Terrence, Tao' which is not a valid user"

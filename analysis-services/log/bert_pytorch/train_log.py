@@ -15,40 +15,60 @@ import os
 
 class Trainer():
     def __init__(self, options):
-        self.device = options["device"]
-        self.model_dir = options["model_dir"]
-        self.model_path = options["model_path"]
-        self.vocab_path = options["vocab_path"]
-        self.output_path = options["output_dir"]
-        self.window_size = options["window_size"]
-        self.adaptive_window = options["adaptive_window"]
-        self.sample_ratio = options["train_ratio"]
-        self.valid_ratio = options["valid_ratio"]
-        self.seq_len = options["seq_len"]
-        self.max_len = options["max_len"]
-        self.corpus_lines = options["corpus_lines"]
-        self.on_memory = options["on_memory"]
-        self.batch_size = options["batch_size"]
-        self.num_workers = options["num_workers"]
-        self.lr = options["lr"]
-        self.adam_beta1 = options["adam_beta1"]
-        self.adam_beta2 = options["adam_beta2"]
-        self.adam_weight_decay = options["adam_weight_decay"]
-        self.with_cuda = options["with_cuda"]
-        self.cuda_devices = options["cuda_devices"]
-        self.log_freq = options["log_freq"]
-        self.epochs = options["epochs"]
-        self.hidden = options["hidden"]
-        self.layers = options["layers"]
-        self.attn_heads = options["attn_heads"]
-        self.is_logkey = options["is_logkey"]
-        self.is_time = options["is_time"]
-        self.scale = options["scale"]
-        self.scale_path = options["scale_path"]
-        self.n_epochs_stop = options["n_epochs_stop"]
-        self.hypersphere_loss = options["hypersphere_loss"]
-        self.mask_ratio = options["mask_ratio"]
-        self.min_len = options['min_len']
+        defaults = {
+            "device": 'cuda' if torch.cuda.is_available() else 'cpu',
+            "output_dir": "./output/",
+            "model_dir": "./output/bert/",
+            "model_path": "./output/bert/best_bert.pth",
+            "train_vocab": "./output/train",
+            "vocab_path": "./output/vocab.pkl",
+
+            "window_size": 128,
+            "adaptive_window": True,
+            "seq_len": 100,
+            "max_len": 512,
+            "min_len": 10,
+            "mask_ratio": 0.35,
+            "train_ratio": 0.6,
+            "valid_ratio": 0.15,
+            "test_ratio": 0.25,
+
+            "is_logkey": True,
+            "is_time": False,
+
+            "hypersphere_loss": True,
+            "hypersphere_loss_test": True,
+
+            "scale": None,
+            "scale_path": None,
+
+            "hidden": 64,
+            "layers": 4,
+            "attn_heads": 4,
+
+            "epochs": 50,
+            "n_epochs_stop": 10,
+            "batch_size": 32,
+
+            "corpus_lines": None,
+            "on_memory": True,
+            "num_workers": 5,
+
+            "lr": 1e-3,
+            "adam_beta1": 0.9,
+            "adam_beta2": 0.999,
+            "adam_weight_decay": 0.00,
+            "with_cuda": True,
+            "cuda_devices": None,
+            "log_freq": None
+        }
+
+        # Merge defaults with incoming options
+        config = {**defaults, **options}
+
+        # Assign to self
+        for key, value in config.items():
+            setattr(self, key, value)
 
         print("Save options parameters")
         save_parameters(options, self.model_dir + "parameters.txt")
@@ -159,8 +179,6 @@ class Trainer():
 
     def calculate_center(self, data_loader_list):
         print("start calculate center")
-        # model = torch.load(self.model_path)
-        # model.to(self.device)
         with torch.no_grad():
             outputs = 0
             total_samples = 0
@@ -190,8 +208,3 @@ class Trainer():
         plt.savefig(self.model_dir + "train_valid_loss.png")
         plt.show()
         print("plot done")
-
-
-
-
-

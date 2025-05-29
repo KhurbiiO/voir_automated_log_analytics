@@ -1,13 +1,20 @@
 from pydantic import BaseModel
 
 class DogSniffRequest(BaseModel):
-    dog_score_thresshold : float
-    dog_ID : str
+    ID : str
+    score_thresshold : float
     value: int
 
 class DogSniffResponse (BaseModel):
     is_Anonamly : bool
 
+class BERTWinRequest(BaseModel):
+    ID: str
+    start: str
+    end: str
+    window: int
 
+class BERTWinResponse(BaseModel):
+    result: str
 
 

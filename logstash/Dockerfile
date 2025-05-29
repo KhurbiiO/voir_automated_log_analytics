@@ -6,10 +6,13 @@ RUN bin/logstash-plugin install logstash-output-mongodb
 
 WORKDIR /usr/share/logstash
 
+COPY pipeline/ /usr/share/logstash/pipeline/
+COPY config/pipelines.yml /usr/share/logstash/config/pipelines.yml
+
 USER 1000
 
 EXPOSE 9600
 
-CMD ["logstash", "-f", "pipeline/logstash.conf"]
+CMD ["logstash"]
 
 

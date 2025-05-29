@@ -173,4 +173,10 @@ cython_debug/
 # Custom Ignores
 data
 
-drain/states
+transformation-services/drain/states/
+transformation-services/drain/support/
+transformation-services/doc/
+
+analysis-services/log/states/
+analysis-services/metric/states/
+

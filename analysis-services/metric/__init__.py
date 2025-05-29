@@ -1,2 +1,2 @@
-# from metric.dog import *
+from metric.dog import *
 from metric.manager import *

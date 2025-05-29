@@ -56,7 +56,7 @@ class SmartFilter():
                             return True, cluster.cluster_id
         return False, cluster.cluster_id
     
-    def calc_cosine_simalirity(A, B):
+    def calc_cosine_simalirity(self, A, B):
         return np.dot(A,B)/(norm(A)*norm(B))
 
     def create_template_whitelist(self, df: pd.DataFrame):

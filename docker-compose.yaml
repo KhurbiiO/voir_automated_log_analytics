@@ -1,5 +1,5 @@
 
-services:  
+services:   
  analysis-service: 
      build:
          context: analysis-services
@@ -25,6 +25,7 @@ services:
          context: logstash
      depends_on:
          - mongo
+         - transformation-service
      networks:
          - pipeline-transformation
          - pipeline-output

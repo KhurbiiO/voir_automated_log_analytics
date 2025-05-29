@@ -15,7 +15,7 @@ class MADMetricDog():
         self.threshold = threshold
         self.count = 0
 
-        self.load(self.state_path) # Load model if one exists
+        self.load() # Load model if one exists
 
     def sniff(self, val):
         """
@@ -33,14 +33,14 @@ class MADMetricDog():
     def train(self, val):
         self.m.fit_partial(np.array([val], dtype=np.float64))
     
-    def load(self, path):
+    def load(self):
         try:
-            with open(path, "rb") as file:
+            with open(self.state_path, "rb") as file:
                 self.m = pickle.load(file)
         except Exception as e:
             print(e)
 
-    def save(self, path):
-        with open(path, "wb") as file:
+    def save(self):
+        with open(self.state_path, "wb") as file:
             pickle.dump(self.m, file)
 
