@@ -1,5 +1,11 @@
 from pydantic import BaseModel
 
+class DogSniffPreload(BaseModel):
+    ID : str
+    start: str
+    end: str
+
+
 class DogSniffRequest(BaseModel):
     ID : str
     score_thresshold : float
@@ -8,13 +14,13 @@ class DogSniffRequest(BaseModel):
 class DogSniffResponse (BaseModel):
     is_Anonamly : bool
 
-class BERTWinRequest(BaseModel):
+class WinRequest(BaseModel):
     ID: str
     start: str
     end: str
     window: int
 
-class BERTWinResponse(BaseModel):
+class WinResponse(BaseModel):
     result: str
 
 

@@ -30,8 +30,13 @@ class MADMetricDog():
 
         return score
     
+    def parse_data(self, values):
+        X = np.array([[x] for x in values], dtype=np.float64) 
+        return X
+    
     def train(self, val):
-        self.m.fit_partial(np.array([val], dtype=np.float64))
+        X = self.parse_data(val)
+        self.m.fit_partial(X)
     
     def load(self):
         try:
