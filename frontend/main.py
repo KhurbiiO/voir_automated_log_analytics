@@ -3,6 +3,8 @@ import requests
 import pandas as pd
 import json
 
+from datetime import datetime
+
 st.title("VOIR - Automated Support Engineering")
 
 # Make HTTP request
@@ -14,6 +16,7 @@ try:
 
     # Convert to DataFrame
     df = pd.DataFrame(data)
+    df["@timestamp"] = pd.to_datetime(df['@timestamp'], format="ISO8601") # Convert to datetime
 
     st.success("Data loaded from API")
     st.dataframe(df)
@@ -53,9 +56,30 @@ try:
         response = requests.post("http://localhost:8000/deeplog", json=req)
 
         if response.status_code == 200:
-            data = response.json()
+            data = json.loads(response.json())
+
+            df_show = df[(df['@timestamp'] >= start.isoformat())]
+            df_show = df_show[(df_show['@timestamp'] <= end.isoformat())]
+
+            sequences = []
+            for i in range(0, len(df_show), seq_len):
+                chunk = df_show.iloc[i:i + seq_len].reset_index(drop=True)
+                sequences.append(chunk)
+
+            assert len(sequences) == len(data)
+
+            count = 0
+            for idx, val in enumerate(data):
+                
+                if val < 0.5:
+                    count += 1
+                    st.divider()
+                    st.dataframe(sequences[idx])
+                    st.text(f"Anomaly score: {1 - val}")
+                    st.divider()
 
             st.text(data)
+            st.text(f"Anomalies found: {count} out of {len(data)} chunks of size {seq_len}")
 
     st.divider()
 
@@ -73,58 +97,58 @@ except requests.exceptions.RequestException as e:
     st.error(f"Failed to fetch data: {e}")
 
 
-# Make HTTP request
-try:
-    st.header("Metric Analytics")
-    response = requests.get("http://localhost:8000/load_metric")
-    response.raise_for_status()
-    data = response.json()
+# # Make HTTP request
+# try:
+#     st.header("Metric Analytics")
+#     response = requests.get("http://localhost:8000/load_metric")
+#     response.raise_for_status()
+#     data = response.json()
 
-    # Convert to DataFrame
-    df = pd.DataFrame(data)
+#     # Convert to DataFrame
+#     df = pd.DataFrame(data)
 
-    st.success("Data loaded from API")
+#     st.success("Data loaded from API")
 
-    st.line_chart(
-        data=df.set_index("@timestamp")["Value"],
-        use_container_width=True
-    )
+#     st.line_chart(
+#         data=df.set_index("@timestamp")["Value"],
+#         use_container_width=True
+#     )
 
-    start = st.date_input("Metric Train Start-date:")
-    end = st.date_input("Metric Train End-date:")
+#     start = st.date_input("Metric Train Start-date:")
+#     end = st.date_input("Metric Train End-date:")
 
-    button = st.button("Train Dog")
+#     button = st.button("Train Dog")
 
-    if button:
-        req = {
-            "ID" : "test",
-            "start" : start.isoformat(),
-            "end" : end.isoformat(),
-        }
+#     if button:
+#         req = {
+#             "ID" : "test",
+#             "start" : start.isoformat(),
+#             "end" : end.isoformat(),
+#         }
 
-        requests.post("http://localhost:8000/metric_load_db", json=req)
+#         requests.post("http://localhost:8000/metric_load_db", json=req)
 
-        if response.status_code == 200:
-            data = response.json()
+#         if response.status_code == 200:
+#             data = response.json()
 
-            st.text(data)
+#             st.text(data)
 
     
-    metric_input = st.number_input("Metric Input:")
+#     metric_input = st.number_input("Metric Input:")
     
-    if metric_input:
-        req = {
-            "ID" : "test",
-            "score_thresshold" : 0.05,
-            "value" : int(metric_input),
-        }
+#     if metric_input:
+#         req = {
+#             "ID" : "test",
+#             "score_thresshold" : 0.05,
+#             "value" : int(metric_input),
+#         }
 
-        response = requests.post("http://localhost:8000/metric", json=req)
+#         response = requests.post("http://localhost:8000/metric", json=req)
 
-        if response.status_code == 200:
-            data = response.json()
+#         if response.status_code == 200:
+#             data = response.json()
 
-            st.text(data)
+#             st.text(data)
 
-except requests.exceptions.RequestException as e:
-    st.error(f"Failed to fetch data: {e}")
+# except requests.exceptions.RequestException as e:
+#     st.error(f"Failed to fetch data: {e}")
