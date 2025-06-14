@@ -36,7 +36,7 @@ class MADMetricDog():
     
     def train(self, val):
         X = self.parse_data(val)
-        self.m.fit_partial(X)
+        self.m.fit(X)
     
     def load(self):
         try:

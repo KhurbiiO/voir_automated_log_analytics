@@ -1,26 +1,26 @@
 from pydantic import BaseModel
 
-class DogSniffPreload(BaseModel):
+class MetricPreload(BaseModel):
     ID : str
     start: str
     end: str
 
 
-class DogSniffRequest(BaseModel):
+class MetricAnalysisRequest(BaseModel):
     ID : str
     score_thresshold : float
-    value: int
+    value: float
 
-class DogSniffResponse (BaseModel):
-    is_Anonamly : bool
+class MetricAnalysisResponse (BaseModel):
+    anonamly : bool
 
-class WinRequest(BaseModel):
+class LogAnalysisRequest(BaseModel):
     ID: str
     start: str
     end: str
     window: int
 
-class WinResponse(BaseModel):
+class LogAnalysisResponse(BaseModel):
     result: str
 
 

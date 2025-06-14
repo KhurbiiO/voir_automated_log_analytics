@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 
-from util import TransformRequest, TransformResponse, load_dataset
+from util._pydantic import *
+from util import load_dataset
 from drain import MultiSMManager
 from presidio import MultiPresidioManager
 
@@ -29,13 +30,37 @@ def test2():
     result = metric_df["_value"][i % len(metric_df)]
     return {"msg": float(result)}
 
+@app.post("/smart-filter")
+def get_smart_filter(req: SmartFilterRequest):
+    anomaly, _ = drain_manager.run(req.template_miner_ID, req.msg, req.smart_filter_threshold)
+    result = SmartFilterResponse(
+        anomaly=anomaly
+    )
+    return result
+
+@app.post("/pii-detection")
+def get_pii_detection(req: PIIRequest):
+    pii = presidio_manager.run(req.pii_detection_lang, req.msg)
+    result = PIIResponse(
+        PII=("True" if len(pii) > 0 else "False")
+    )
+    return result
+
+@app.post("/template")
+def get_template_miner(req: TemplateRequest):
+    template = drain_manager.filters[req.template_miner_ID].get_template(req.cluster_ID)
+    result = TemplateResponse(
+        template=template
+    )
+    return result
+
 @app.post("/full-transform")
 def get_full_transform(req: TransformRequest):
-    pii = presidio_manager.run(req.pii_detection_LANG, req.msg)
-    anomaly, clusterid = drain_manager.run(req.template_miner_ID, req.msg, req.smart_filter_THRESHOLD)
+    pii = presidio_manager.run(req.pii_detection_lang, req.msg)
+    anomaly, clusterid = drain_manager.run(req.template_miner_ID, req.msg, req.smart_filter_threshold)
 
     result = TransformResponse(
-        template=clusterid,
+        template_ID=clusterid,
         anomaly=anomaly,
         PII=("True" if len(pii) > 0 else "False")
     )
