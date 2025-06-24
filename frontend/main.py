@@ -63,7 +63,7 @@ try:
                              for i in range(0, len(filtered_df), seq_len)]
                 assert len(sequences) == len(anomaly_scores)
 
-                anomalies = [(i, score, seq) for i, (score, seq) in enumerate(zip(anomaly_scores, sequences)) if score < 0.5]
+                anomalies = [(i, score, seq) for i, (score, seq) in enumerate(zip(anomaly_scores, sequences)) if score < 0.4]
 
                 for i, score, seq in anomalies:
                     st.divider()
