@@ -32,6 +32,19 @@ The data parser uses the [Drain](https://github.com/logpai/Drain3) algorithm to 
 | PROFILING   | `enabled`              | Enables performance profiling.                                             |
 | PROFILING   | `report_sec`           | Frequency of profiling reports in seconds.                                 |
 
+---
+#### **Smart Filter (Heuristic-Based Anomaly Detection)**
+This is a custom-built filter system designed to replicate the heuristics of experienced support engineers using template level knowledge.
+
+##### ⚙️ How It Works:
+1. Parses incoming messages into structured events.
+2. Compares the event against a known whitelist of important/anomalous templates.
+3. Uses a transformer model (`MiniLM-L6-v2`) to compute cosine similarity between variable parts of logs.
+4. Makes a decision whether to flag or pass the log.
+
+##### ⚠️ Note:
+As a heuristic algorithm, it does not guarantee perfect accuracy but provides high practical effectiveness in real-world log triage scenarios.
+
 #### 📁 Global Configuration (YAML):
 Each system instance is initialized via YAML, where the instance key includes:
 
@@ -59,28 +72,5 @@ Each system instance is initialized via YAML, where the instance key includes:
 - `state`: Path to Drain's serialized state.
 - `config`: Path to Drain's configuration.
 - `support`: Path to Smart Filter whitelist CSV.
----
-
-### 3. **Smart Filter (Heuristic-Based Anomaly Detection)**
-This is a custom-built filter system designed to replicate the heuristics of experienced support engineers.
-
-#### ⚙️ How It Works:
-1. Parses incoming messages into structured events.
-2. Compares the event against a known whitelist of important/anomalous templates.
-3. Uses a transformer model (`MiniLM-L6-v2`) to compute cosine similarity between variable parts of logs.
-4. Makes a decision whether to flag or pass the log.
-
-#### ⚠️ Note:
-As a heuristic algorithm, it does not guarantee perfect accuracy but provides high practical effectiveness in real-world log triage scenarios.
 
 ---
-
-## 📦 Setup & Usage
-
-### 🧰 Prerequisites:
-- Python 3.8+
-- `pip install -r requirements.txt`
-
-### 🚀 Starting the Service:
-```bash
-python main.py --config path/to/global_config.yaml

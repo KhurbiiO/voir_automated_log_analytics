@@ -2,7 +2,7 @@ import sys
 sys.path.append("log")
 
 from bert_pytorch import Predictor
-from log_analyzer import DeepLogAnalyzer
+from log_analyzer import DeepLogAnalyzer, LogBERTAnalyzer
 
 from util import load_config
 
@@ -27,7 +27,11 @@ class MultiLAManager:
                     options["seq_len"] = seq_len
                     options["num_candidates"] = n_pred
 
-                    self.log_analyzers[key] = Predictor(options)
+                    model = LogBERTAnalyzer(directory=directory, 
+                                            model_directory=model_directory, 
+                                            seq_len=seq_len)
+
+                    self.log_analyzers[key] = model
 
                 case "DL":
                     model_path = self.config[key]["model"]

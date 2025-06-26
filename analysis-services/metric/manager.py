@@ -1,21 +1,21 @@
 from util import load_config
 
-from metric.dog import MADMetricDog
+from metric.metric_analyzer import MADMetricAnalyzer
 
-class MultiDogManager:
+class MultiMAManager:
     def __init__(self, filepath: str):
         self.config = load_config(filepath)
-        self.dogs = {}
+        self.analyzers = {}
 
         for key in self.config.keys():
             model = self.config[key]["config"]
             match model:
                 case "MAD":
-                    dog = MADMetricDog(self.config[key]["state"])
-                    self.dogs.update({key: dog})
+                    analyzer = MADMetricAnalyzer(self.config[key]["state"])
+                    self.analyzers.update({key: analyzer})
                 case _:
                     raise KeyError(f"The model {model} is not known")
 
     def run(self, key:str, val):
-        dog = self.dogs[key]
-        return dog.sniff(val)
+        dog = self.analyzers[key]
+        return dog.analyze(val)

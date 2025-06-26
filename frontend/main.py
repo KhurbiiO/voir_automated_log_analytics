@@ -11,7 +11,7 @@ st.title("🔍 VOIR - Automated Support Engineering")
 st.header("📑 Log Analytics")
 
 try:
-    response = requests.get("http://localhost:8000/load_log")
+    response = requests.get("http://analysis-service:8000/load_log")
     response.raise_for_status()
     data = response.json()
 
@@ -42,7 +42,7 @@ try:
         with st.spinner("Running LogBERT..."):
             try:
                 req = {"ID": "fine", "start": start.isoformat(), "end": end.isoformat(), "window": seq_len}
-                response = requests.post("http://localhost:8000/logbert", json=req)
+                response = requests.post("http://analysis-service:8000/logbert", json=req)
                 response.raise_for_status()
                 st.success("LogBERT Results")
                 st.json(response.json()["result"])
@@ -53,7 +53,7 @@ try:
         with st.spinner("Running DeepLog..."):
             try:
                 req = {"ID": "test2", "start": start.isoformat(), "end": end.isoformat(), "window": seq_len}
-                response = requests.post("http://localhost:8000/deeplog", json=req)
+                response = requests.post("http://analysis-service:8000/deeplog", json=req)
                 response.raise_for_status()
 
                 anomaly_scores = json.loads(response.json()["result"])
@@ -95,7 +95,7 @@ try:
         with st.spinner("Fetching template..."):
             try:
                 req = {"template_miner_ID": "test", "cluster_ID": clusterID}
-                response = requests.post("http://localhost:8001/template", json=req)
+                response = requests.post("http://transformation-service:8001/template", json=req)
                 response.raise_for_status()
                 st.success("Template fetched successfully.")
                 st.json(response.json())
@@ -109,7 +109,7 @@ except requests.exceptions.RequestException as e:
 st.header("📈 Metric Analytics")
 
 try:
-    response = requests.get("http://localhost:8000/load_metric")
+    response = requests.get("http://analysis-service:8000/load_metric")
     response.raise_for_status()
     data = response.json()
 
@@ -140,7 +140,7 @@ try:
                     "start": train_start.isoformat(),
                     "end": train_end.isoformat()
                 }
-                train_resp = requests.post("http://localhost:8000/metric_preload", json=train_req)
+                train_resp = requests.post("http://analysis-service:8000/metric_preload", json=train_req)
                 train_resp.raise_for_status()
                 st.success("Training request sent successfully.")
                 st.json(train_resp.json())
@@ -161,7 +161,7 @@ try:
                     "score_thresshold": 0.05,
                     "value": int(metric_input)
                 }
-                pred_resp = requests.post("http://localhost:8000/metric", json=predict_req)
+                pred_resp = requests.post("http://analysis-service:8000/metric", json=predict_req)
                 pred_resp.raise_for_status()
                 st.success("Prediction Result")
                 st.json(pred_resp.json())

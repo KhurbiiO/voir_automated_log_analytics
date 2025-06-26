@@ -4,7 +4,7 @@ import pandas as pd
 
 from util._pydantic import *
 from util import DBClient
-from metric.manager import MultiDogManager
+from metric.manager import MultiMAManager
 from log.manager import MultiLAManager
 import json
 
@@ -17,8 +17,8 @@ MONGO_COLLECTION_2 = "test_2"
 
 client = DBClient(MONGO_URI, MONGO_DB)
 
-dog_manager = MultiDogManager("metric/config/metric_anomaly.config")
-bert_manager = MultiLAManager("log/config/log_anomaly.config")
+ma_manager = MultiMAManager("metric/config/metric_anomaly.config")
+la_manager = MultiLAManager("log/config/log_anomaly.config")
 
 app = FastAPI()
 
@@ -39,7 +39,7 @@ def load_metric_db(req:MetricPreload):
     df = pd.DataFrame(client.read_window(datetime.fromisoformat(req.start), datetime.fromisoformat(req.end), MONGO_COLLECTION_2))
     values = df["Value"]
     try:
-        dog_manager.dogs[req.ID].train(values)
+        ma_manager.analyzers[req.ID].train(values)
     except ValueError:
         return JSONResponse(content={"status": "Error", "message": "Training failed. Check the data."}, status_code=400)
     return JSONResponse(content={"status": "Success", "message": "Training completed successfully."})
@@ -47,7 +47,7 @@ def load_metric_db(req:MetricPreload):
 
 @app.post("/metric")
 def metric_check(req: MetricAnalysisRequest):
-    score = dog_manager.run(req.ID, req.value)
+    score = ma_manager.run(req.ID, req.value)
 
     result = MetricAnalysisResponse(anonamly=score>req.score_thresshold)
 
@@ -64,7 +64,7 @@ def log_window_check(req: LogAnalysisRequest):
         sequences.append(templates[i:i+req.window])
     
     result = LogAnalysisResponse(
-        result=json.dumps([bert_manager.run(req.ID, " ".join(seq))["anomaly"] for seq in sequences])
+        result=json.dumps([la_manager.run(req.ID, " ".join(seq))["anomaly"] for seq in sequences])
     )
     
     return result
@@ -78,6 +78,6 @@ def log_window_check(req: LogAnalysisRequest):
         sequences.append(chunk)
     
     result = LogAnalysisResponse(
-        result=json.dumps([bert_manager.run(req.ID, seq)[0] for seq in sequences])
+        result=json.dumps([la_manager.run(req.ID, seq)[0] for seq in sequences])
     )    
     return result

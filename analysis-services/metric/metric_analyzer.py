@@ -3,12 +3,7 @@ import pickle
 
 from pysad.models import MedianAbsoluteDeviation
 
-class MADMetricDog():
-    """
-    A metric stream anomaly detection agent based on a Median Absolute Deviation model
-
-    """
-
+class MADMetricAnalyzer():
     def __init__(self, state_path, threshold=1000):
         self.m = MedianAbsoluteDeviation()
         self.state_path = state_path
@@ -17,11 +12,7 @@ class MADMetricDog():
 
         self.load() # Load model if one exists
 
-    def sniff(self, val):
-        """
-        Analyze data coming in and fit model for the new value. (Automatic save after dog has sniffed a specified amount of values)
-
-        """
+    def analyze(self, val):
         score = self.m.fit_score_partial(np.array([val], dtype=np.float64))
         self.count += 1
         if self.count == self.threshold:

@@ -5,7 +5,6 @@ class MetricPreload(BaseModel):
     start: str
     end: str
 
-
 class MetricAnalysisRequest(BaseModel):
     ID : str
     score_thresshold : float
