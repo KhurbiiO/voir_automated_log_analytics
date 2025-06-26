@@ -10,6 +10,21 @@ from drain3.file_persistence import FilePersistence
 
 class Processor():
     def __init__(self, options):
+      defaults = {
+        "drain_config": "./config/drain.ini",
+        "drain_state": "./state/drain.pkl",
+        "output_dir": "./output/",
+        "seq_len": 100,
+        "train_ratio": 0.6,
+      }
+
+      # Merge defaults with incoming options
+      config = {**defaults, **options}
+
+      # Assign to self
+      for key, value in config.items():
+          setattr(self, key, value)
+      
       self.drain_config_path = options["drain_config"]
       self.drain_state_path = options["drain_state"]
 
@@ -30,11 +45,10 @@ class Processor():
         ID = self.drain_miner.add_log_message(msg)["cluster_id"]
         return f"E{ID}"
 
-    def preprocess(self, path, labels=[]):
+    def preprocess(self, path, labels=False):
         df = pd.read_csv(path)
-
-        if labels:
-          df["Label"] = labels # Assume that all message are not anomalous
+        if not labels:
+          df["Label"] = 0 # Assume that all message are not anomalous
 
         df["EventId"] = df.apply(lambda row: self.inference(row._value), axis=1)
         df["datetime"] = pd.to_datetime(df['_time'])
@@ -48,6 +62,13 @@ class Processor():
         df = df[["timestamp", "Label", "EventId", "deltaT"]]
 
         df.to_csv(self.structured_csv, index=False)
+
+    def log_messages_to_keys(self, log_messages):
+        log_keys = []
+        for msg in log_messages:
+            cluster_id = self.drain_miner.add_log_message(msg)["cluster_id"]
+            log_keys.append(f"E{cluster_id}")
+        return log_keys
 
     def process(self, shuffle_seq=True):
         df = pd.read_csv(self.structured_csv )

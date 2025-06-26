@@ -1,4 +1,7 @@
 import numpy as np
+import scipy.stats as stats
+import seaborn as sns
+import matplotlib.pyplot as plt
 import pickle
 import time
 import torch
@@ -44,38 +47,69 @@ def find_best_threshold(test_normal_results, test_abnormal_results, params, th_r
 
 
 class Predictor():
-    def __init__(self, options):
-        self.model_path = options["model_path"]
-        self.vocab_path = options["vocab_path"]
-        self.device = options["device"]
-        self.window_size = options["window_size"]
-        self.adaptive_window = options["adaptive_window"]
-        self.seq_len = options["seq_len"]
-        self.corpus_lines = options["corpus_lines"]
-        self.on_memory = options["on_memory"]
-        self.batch_size = options["batch_size"]
-        self.num_workers = options["num_workers"]
-        self.num_candidates = options["num_candidates"]
-        self.output_dir = options["output_dir"]
-        self.model_dir = options["model_dir"]
-        self.gaussian_mean = options["gaussian_mean"]
-        self.gaussian_std = options["gaussian_std"]
+    def __init__(self, options={}):
+        # Define defaults
+        defaults = {
+            "device": "cpu",
+            "output_dir": "./output/",
+            "model_dir": "./output/bert/",
+            "model_path": "./output/bert/best_bert.pth",
+            "train_vocab": "./output/train",
+            "vocab_path": "./output/vocab.pkl",
 
-        self.is_logkey = options["is_logkey"]
-        self.is_time = options["is_time"]
-        self.scale_path = options["scale_path"]
+            "window_size": 128,
+            "adaptive_window": True,
+            "seq_len": 100,
+            "max_len": 512,
+            "min_len": 10,
+            "mask_ratio": 0.35,
+            "train_ratio": 0.6,
+            "valid_ratio": 0.15,
+            "test_ratio": 0.25,
 
-        self.hypersphere_loss = options["hypersphere_loss"]
-        self.hypersphere_loss_test = options["hypersphere_loss_test"]
+            "is_logkey": True,
+            "is_time": False,
 
+            "hypersphere_loss": True,
+            "hypersphere_loss_test": True,
+
+            "scale": None,
+            "scale_path": None,
+
+            "hidden": 256,
+            "layers": 4,
+            "attn_heads": 4,
+
+            "epochs": 50,
+            "n_epochs_stop": 10,
+            "batch_size": 32,
+
+            "corpus_lines": None,
+            "on_memory": True,
+            "num_workers": 5,
+
+            "num_candidates": 3,
+            "gaussian_mean": 0.0,
+            "gaussian_std": 1.0,
+        }
+
+        # Merge defaults with incoming options
+        config = {**defaults, **options}
+
+        # Assign to self
+        for key, value in config.items():
+            setattr(self, key, value)
+
+        # Derived attributes
         self.lower_bound = self.gaussian_mean - 3 * self.gaussian_std
         self.upper_bound = self.gaussian_mean + 3 * self.gaussian_std
 
+        self.model = None
         self.center = None
         self.radius = None
-        self.test_ratio = options["test_ratio"]
-        self.mask_ratio = options["mask_ratio"]
-        self.min_len=options["min_len"]
+
+        self.init()
+
 
     def detect_logkey_anomaly(self, masked_output, masked_label):
         num_undetected_tokens = 0
@@ -95,7 +129,7 @@ class Predictor():
         """
         log_seqs = []
         tim_seqs = []
-        with open(file_name, "r") as f:
+        with open(output_dir + file_name, "r") as f:
             for idx, line in tqdm(enumerate(f.readlines())):
                 #if idx > 40: break
                 log_seq, tim_seq = fixed_window(line, window_size,
@@ -120,7 +154,7 @@ class Predictor():
         print(f"{file_name} size: {len(log_seqs)}")
         return log_seqs, tim_seqs
 
-    def helper(self, model, output_dir, file_name, vocab, scale=None, error_dict=None, verbose=True):
+    def helper(self, model, output_dir, file_name, vocab, scale=None, error_dict=None):
         total_results = []
         total_errors = []
         output_results = []
@@ -148,17 +182,8 @@ class Predictor():
 
             result = model(data["bert_input"], data["time_input"])
 
-            # mask_lm_output, mask_tm_output: batch_size x session_size x vocab_size
-            # cls_output: batch_size x hidden_size
-            # bert_label, time_label: batch_size x session_size
-            # in session, some logkeys are masked
-
             mask_lm_output, mask_tm_output = result["logkey_output"], result["time_output"]
             output_cls += result["cls_output"].tolist()
-
-            # dist = torch.sum((result["cls_output"] - self.hyper_center) ** 2, dim=1)
-            # when visualization no mask
-            # continue
 
             # loop though each session in batch
             for i in range(len(data["bert_label"])):
@@ -193,7 +218,7 @@ class Predictor():
                     # if dist > 0.25:
                     #     pass
 
-                if (idx < 10 or idx % 1000 == 0) and verbose:
+                if idx < 10 or idx % 1000 == 0:
                     print(
                         "{}, #time anomaly: {} # of undetected_tokens: {}, # of masked_tokens: {} , "
                         "# of total logkey {}, deepSVDD_label: {} \n".format(
@@ -207,31 +232,63 @@ class Predictor():
                     )
                 total_results.append(seq_results)
 
-        return total_results
+        return total_results, output_cls
     
-    def predicts(self, file):
-        model = torch.load(self.model_path)
-        model.to(self.device)
-        model.eval()
-        print('model_path: {}'.format(self.model_path))
+    def init(self):
+        self.model = torch.load(self.model_path, map_location=torch.device('cpu'))
+        self.model.to(self.device)
+        self.model.eval()
+
+        self.vocab = WordVocab.load_vocab(self.vocab_path)
         
-        vocab = WordVocab.load_vocab(self.vocab_path)
-
-        scale = None
-        error_dict = None
-        if self.is_time:
-            with open(self.scale_path, "rb") as f:
-                scale = pickle.load(f)
-
-            with open(self.model_dir + "error_dict.pkl", 'rb') as f:
-                error_dict = pickle.load(f)
-
         if self.hypersphere_loss:
-            center_dict = torch.load(self.model_dir + "best_center.pt")
+            center_dict = torch.load(self.model_dir + "best_center.pt", map_location=torch.device('cpu'))
             self.center = center_dict["center"]
             self.radius = center_dict["radius"]
-        
-        return self.helper(model, self.output_dir, file, vocab, scale, error_dict)
+    
+    def predict_single_sequence(self, log_seq, time_seq=None):       
+        log_seq = [log_seq]
+        if self.is_time and time_seq is not None:
+            time_seq = [time_seq]
+        else:
+            time_seq = [[0.0] * len(log_seq[0])]
+
+        seq_dataset = LogDataset(
+            log_seq, time_seq, self.vocab,
+            seq_len=self.seq_len, corpus_lines=1,
+            on_memory=True, predict_mode=True,
+            mask_ratio=self.mask_ratio
+        )
+
+        data_loader = DataLoader(seq_dataset, batch_size=1, num_workers=0,
+                                collate_fn=seq_dataset.collate_fn)
+
+        for data in data_loader:
+            data = {key: value.to(self.device) for key, value in data.items()}
+            result = self.model(data["bert_input"], data["time_input"])
+
+            mask_lm_output = result["logkey_output"]
+            mask_index = data["bert_label"][0] > 0
+
+            num_undetected, output_seq = self.detect_logkey_anomaly(
+                mask_lm_output[0][mask_index],
+                data["bert_label"][0][mask_index]
+            )
+
+            output = {
+                "undetected_tokens": num_undetected,
+                "masked_tokens": torch.sum(mask_index).item(),
+                "anomaly": num_undetected > self.mask_ratio * self.seq_len,
+                "predictions": output_seq[0],  # top predicted tokens
+                "true_labels": output_seq[1]
+            }
+
+            if self.hypersphere_loss:
+                dist = torch.sqrt(torch.sum((result["cls_output"][0] - self.center) ** 2))
+                output["hypersphere_dist"] = dist.item()
+                output["deepSVDD_label"] = int(dist.item() > self.radius)
+
+            return output
 
     def predict(self):
         model = torch.load(self.model_path)

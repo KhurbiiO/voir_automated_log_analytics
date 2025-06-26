@@ -1,4 +1,5 @@
-services:
+
+services:   
  analysis-service: 
      build:
          context: analysis-services
@@ -9,6 +10,7 @@ services:
       - mongo
      networks:
          - generation-database
+         - frontend-services
 
  transformation-service:
      build:
@@ -18,12 +20,24 @@ services:
      stop_signal: SIGINT
      networks:
          - pipeline-transformation
-     
+         - frontend-services
+ frontend:
+        build:
+            context: frontend
+        ports:
+            - "8501:8501"
+        depends_on:
+            - analysis-service
+            - transformation-service
+        networks:
+            - frontend-services
+
  logstash:
      build:
          context: logstash
      depends_on:
          - mongo
+         - transformation-service
      networks:
          - pipeline-transformation
          - pipeline-output
@@ -58,6 +72,7 @@ networks:
     pipeline-input:
     pipeline-transformation:
     pipeline-output:
+    frontend-services:
 
 volumes:
     mongodb_data:

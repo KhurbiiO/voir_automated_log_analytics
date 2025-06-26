@@ -18,6 +18,9 @@ class MultiPresidioManager:
             )
 
             self.engines.update({key: analyzer})
+            
+    def get_engine(self, key):
+        return self.engines[key]
 
     def run(self, lang:str, msg: str):
         engine = self.engines[lang]
