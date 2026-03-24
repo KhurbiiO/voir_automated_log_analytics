@@ -1,6 +1,6 @@
 # Vital Operation Insights Reporter - VOIR
 
-> A framework for AI-powered log analytics designed for integration into the AMI environment.
+> A framework for AI-powered log analytics 
 
 
 ---
